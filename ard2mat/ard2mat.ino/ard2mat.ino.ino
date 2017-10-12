@@ -83,5 +83,11 @@ void loop()
   Serial.println(a.acceleration.x);
   Serial.println(a.acceleration.y);
   Serial.println(a.acceleration.z);
+  Serial.println(g.gyro.x);
+  Serial.println(g.gyro.y);
+  Serial.println(g.gyro.z);
+  Serial.println(m.magnetic.x);
+  Serial.println(m.magnetic.y);
+  Serial.println(m.magnetic.z);
   delay(250);
 }
