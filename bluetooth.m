@@ -4,39 +4,44 @@
 %%
 
 %Set up bluetooth communication
-portNum = [1,2,3];
-imuNum = length(portNum);
-imuVals(1:3,1:3,1:imuNum) = 1;
-for i=1:imuNum
-    comPort = sprintf('COM%d',portNum(i));
-    %arduino{i} = serial(comPort,'BaudRate',115200); % Bluetooth
-    
-    %Open bluetooth connection
-    %fopen(arduino{i});
-end
+%accel, gyro, mag
+%b = Bluetooth('RNBT-195D',1);
+%b = serial('COM8','BaudRate',115200); % Serial port
+b = serial('COM7','BaudRate',115200); % Bluetooth
+fopen(b)
 %%
+imuNum=1
+z=0;
+while z <10
+for i=1:20
+    imuData{i} = fgets(b);
+    accel{i} = strfind(imuData{i}, '-1');
+    gyro{i} = strfind(imuData{i}, '-2');
+    mag{i} = strfind(imuData{i}, '-3');
 
-z = 0;
-%Collect accelerometer data from arduinos
-
-% This part needs some work to store the incoming stream into the 3D matrix
-
-while (z<200)
-    for i = 1:imuNum
-        for j = 1:3
-            for k = 1:3
-                imuData{i} = cat(1, imuVals(j,k,i), str2double(fgets(arduino{i})));
-            end
-        end
-    end
-    z = z+1
 end
-fclose(arduino1);
-%%
-%Throw away 0 values
-accel_x_1 = accel_x_1(accel_x_1~= 0);
-accel_y_1 = accel_y_1(accel_y_1~= 0);
-accel_z_1 = accel_z_1(accel_z_1~= 0);
-accel_x_2 = accel_x_2(accel_x_2~= 0);
-accel_y_2 = accel_y_2(accel_y_2~= 0);
-accel_z_2 = accel_z_2(accel_z_2~= 0);
+
+[o,foundAccelPos] = find(cellfun(@(x)isequal(x,1),accel));
+[o,foundGyroPos] = find(cellfun(@(x)isequal(x,1),gyro));
+[o,foundMagPos] = find(cellfun(@(x)isequal(x,1),mag));
+
+acclTimeVals(1) = str2num(imuData{foundAccelPos(1)+1});
+acclTimeVals(2) = str2num(imuData{foundAccelPos(1)+2});
+acclTimeVals(3) = str2num(imuData{foundAccelPos(1)+3});
+gyroTimeVals(1) = str2num(imuData{foundGyroPos(1)+1});
+gyroTimeVals(2) = str2num(imuData{foundGyroPos(1)+2});
+gyroTimeVals(3) = str2num(imuData{foundGyroPos(1)+3});
+magTimeVals(1) = str2num(imuData{foundMagPos(1)+1});
+magTimeVals(2) = str2num(imuData{foundMagPos(1)+2});
+magTimeVals(3) = str2num(imuData{foundMagPos(1)+3});
+z=z+1
+
+imuValues{z} = [
+    acclTimeVals(1:3)
+    gyroTimeVals(1:3)
+    magTimeVals(1:3)
+    ]
+
+end
+%close port when done collecting data
+%fclose(b);
